@@ -21,6 +21,11 @@ public class AuthManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text statusText;
 
+    [Header("Profile")]
+    [SerializeField] private GameObject loginPanel;
+    [SerializeField] private GameObject profilePanel;
+    [SerializeField] private TMP_Text profileUsernameText;
+
     private void Start()
     {
         token = PlayerPrefs.GetString("token", "");
@@ -199,12 +204,23 @@ public class AuthManager : MonoBehaviour
 
     private void ShowLogin()
     {
-        Debug.Log("Mostrando pantalla de Login.");
+        if (loginPanel != null)
+            loginPanel.SetActive(true);
+    
+        if (profilePanel != null)
+            profilePanel.SetActive(false);
     }
     
     private void ShowProfile(string displayName)
     {
-        Debug.Log("Usuario autenticado: " + displayName);
+        if (loginPanel != null)
+            loginPanel.SetActive(false);
+    
+        if (profilePanel != null)
+            profilePanel.SetActive(true);
+    
+        if (profileUsernameText != null)
+            profileUsernameText.text = "Bienvenido, " + displayName;
     }
 
     private void SetStatus(string message)
