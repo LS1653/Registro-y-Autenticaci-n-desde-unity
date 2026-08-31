@@ -18,12 +18,14 @@ public class AuthManager : MonoBehaviour
     [SerializeField] private TMP_InputField loginUsernameInput;
     [SerializeField] private TMP_InputField loginPasswordInput;
 
-    [Header("UI")]
-    [SerializeField] private TMP_Text statusText;
+    [Header("Status")]
+    [SerializeField] private TMP_Text registerStatusText;
+    [SerializeField] private TMP_Text loginStatusText;
 
     [Header("Profile")]
     [SerializeField] private GameObject loginPanel;
     [SerializeField] private GameObject profilePanel;
+    [SerializeField] private GameObject registerPanel;
     [SerializeField] private TMP_Text profileUsernameText;
 
     private void Start()
@@ -78,7 +80,7 @@ public class AuthManager : MonoBehaviour
             Debug.LogError(request.error);
             Debug.LogError(request.downloadHandler.text);
     
-            SetStatus("No se pudo registrar el usuario.");
+            registerStatusText.text = "No se pudo registrar el usuario.";
         }
         else
         {
@@ -93,8 +95,10 @@ public class AuthManager : MonoBehaviour
                 "User registered: " +
                 userResponse.usuario.username
             );
+
+            ShowLogin();
     
-            SetStatus("Usuario registrado correctamente.");
+            loginStatusText.text = "Registro exitoso. Ahora inicia sesión.";
         }
     }
 
@@ -124,7 +128,7 @@ public class AuthManager : MonoBehaviour
             Debug.LogError(request.error);
             Debug.LogError(request.downloadHandler.text);
     
-            SetStatus("Usuario o contraseña incorrectos.");
+            loginStatusText.text = "Usuario o contraseña incorrectos.";
         }
         else
         {
@@ -145,9 +149,11 @@ public class AuthManager : MonoBehaviour
             
             Debug.Log("Login correcto.");
             Debug.Log("Usuario: " + username);
-            Debug.Log("Token guardado correctamente.");
-    
-            SetStatus("Inicio de sesión correcto.");
+            Debug.Log("Token guardado correctamente.");    
+            
+            loginStatusText.text = "Inicio de sesión correcto.";
+
+            ShowProfile(username);
         }
     }
 
@@ -207,28 +213,40 @@ public class AuthManager : MonoBehaviour
         if (loginPanel != null)
             loginPanel.SetActive(true);
     
+        if (registerPanel != null)
+            registerPanel.SetActive(false);
+    
+        if (profilePanel != null)
+            profilePanel.SetActive(false);
+    }
+
+    public void ShowRegister()
+    {
+        if (loginPanel != null)
+            loginPanel.SetActive(false);
+    
+        if (registerPanel != null)
+            registerPanel.SetActive(true);
+    
         if (profilePanel != null)
             profilePanel.SetActive(false);
     }
     
     private void ShowProfile(string displayName)
     {
+        Debug.Log("CAMBIANDO A PROFILE: " + displayName);
+    
         if (loginPanel != null)
             loginPanel.SetActive(false);
+    
+        if (registerPanel != null)
+            registerPanel.SetActive(false);
     
         if (profilePanel != null)
             profilePanel.SetActive(true);
     
         if (profileUsernameText != null)
             profileUsernameText.text = "Bienvenido, " + displayName;
-    }
-
-    private void SetStatus(string message)
-    {
-        if (statusText != null)
-        {
-            statusText.text = message;
-        }
-    }
+    }    
 }
 
