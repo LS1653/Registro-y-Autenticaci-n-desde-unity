@@ -32,7 +32,7 @@ public class AuthManager : MonoBehaviour
     {
         token = PlayerPrefs.GetString("token", "");
         username = PlayerPrefs.GetString("username", "");
-    
+        
         if (!string.IsNullOrEmpty(token) &&
             !string.IsNullOrEmpty(username))
         {
@@ -211,7 +211,7 @@ public class AuthManager : MonoBehaviour
     private void ShowLogin()
     {
         if (loginPanel != null)
-            loginPanel.SetActive(true);
+            loginPanel.SetActive(true); loginStatusText.text = "inicia sesión.";
     
         if (registerPanel != null)
             registerPanel.SetActive(false);
@@ -226,8 +226,8 @@ public class AuthManager : MonoBehaviour
             loginPanel.SetActive(false);
     
         if (registerPanel != null)
-            registerPanel.SetActive(true);
-    
+            registerPanel.SetActive(true); registerStatusText.text = "Crear cuenta.";
+            
         if (profilePanel != null)
             profilePanel.SetActive(false);
     }
