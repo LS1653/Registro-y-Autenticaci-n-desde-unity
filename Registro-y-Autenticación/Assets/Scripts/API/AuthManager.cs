@@ -88,8 +88,27 @@ public class AuthManager : MonoBehaviour
         {
             Debug.LogError(request.error);
             Debug.LogError(request.downloadHandler.text);
-    
-            registerStatusText.text = "No se pudo registrar el usuario.";
+        
+            if (request.responseCode == 400)
+            {
+                registerStatusText.text =
+                    "Ya existe una cuenta con ese nombre.";
+            }
+            else if (request.result == UnityWebRequest.Result.ConnectionError)
+            {
+                registerStatusText.text =
+                    "No se pudo conectar con el servidor.";
+            }
+            else if (request.responseCode >= 500)
+            {
+                registerStatusText.text =
+                    "El servidor no está disponible.";
+            }
+            else
+            {
+                registerStatusText.text =
+                    "Ocurrió un error al registrar la cuenta.";
+            }
         }
         else
         {
@@ -136,8 +155,28 @@ public class AuthManager : MonoBehaviour
         {
             Debug.LogError(request.error);
             Debug.LogError(request.downloadHandler.text);
-    
-            loginStatusText.text = "Usuario o contraseña incorrectos.";
+        
+            if (request.responseCode == 400 ||
+                request.responseCode == 401)
+            {
+                loginStatusText.text =
+                    "Usuario o contraseña incorrectos.";
+            }
+            else if (request.result == UnityWebRequest.Result.ConnectionError)
+            {
+                loginStatusText.text =
+                    "No se pudo conectar con el servidor.";
+            }
+            else if (request.responseCode >= 500)
+            {
+                loginStatusText.text =
+                    "El servidor no está disponible.";
+            }
+            else
+            {
+                loginStatusText.text =
+                    "Ocurrió un error al iniciar sesión.";
+            }
         }
         else
         {
