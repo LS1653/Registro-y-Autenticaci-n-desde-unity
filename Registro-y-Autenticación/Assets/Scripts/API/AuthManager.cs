@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Linq;
 
 public class AuthManager : MonoBehaviour
 {
@@ -28,10 +29,16 @@ public class AuthManager : MonoBehaviour
     [SerializeField] private GameObject registerPanel;
     [SerializeField] private TMP_Text profileUsernameText;
 
+    [SerializeField] private ScoreTableUI scoreTableUI;
+
+    private UserApi userApi;
+
     private void Start()
     {
         token = PlayerPrefs.GetString("token", "");
         username = PlayerPrefs.GetString("username", "");
+
+        userApi = gameObject.AddComponent<UserApi>();
         
         if (!string.IsNullOrEmpty(token) &&
             !string.IsNullOrEmpty(username))
@@ -248,5 +255,58 @@ public class AuthManager : MonoBehaviour
         if (profileUsernameText != null)
             profileUsernameText.text = "Bienvenido, " + displayName;
     }    
+
+    public void TestGetUsers()
+    {
+        StartCoroutine(
+            userApi.GetUsers(
+                token,
+                users =>
+                {
+                    Debug.Log(
+                        "Cantidad de usuarios: " +
+                        users.Length
+                    );
+
+                    scoreTableUI.ShowUsers(users);
+    
+                    User[] sortedUsers =
+                        users
+                        .OrderByDescending(
+                            user => user.data.score
+                        )
+                        .ToArray();
+    
+                    foreach (User user in sortedUsers)
+                    {
+                        Debug.Log(
+                            "Usuario: " +
+                            user.username +
+                            " | Score: " +
+                            user.data.score
+                        );
+                    }
+                }
+            )
+        );
+    }
+
+
+    public void TestUpdateScore()
+    {
+        StartCoroutine(
+            userApi.UpdateScore(
+                token,
+                username,
+                500,
+                user =>
+                {
+                    Debug.Log(
+                        "Score actualizado correctamente."
+                    );
+                }
+            )
+        );
+    }
 }
 
