@@ -31,6 +31,8 @@ public class AuthManager : MonoBehaviour
 
     [SerializeField] private ScoreTableUI scoreTableUI;
 
+    private int currentScore = 0;
+
     private UserApi userApi;
 
     private void Start()
@@ -161,6 +163,7 @@ public class AuthManager : MonoBehaviour
             loginStatusText.text = "Inicio de sesión correcto.";
 
             ShowProfile(username);
+            LoadScoreTable();
         }
     }
 
@@ -292,18 +295,49 @@ public class AuthManager : MonoBehaviour
     }
 
 
-    public void TestUpdateScore()
+    public void UpdateScoreButtonClick()
     {
+        int newScore = currentScore + 500;
+    
         StartCoroutine(
             userApi.UpdateScore(
                 token,
                 username,
-                500,
+                newScore,
                 user =>
                 {
+                    currentScore = user.data.score;
+    
                     Debug.Log(
-                        "Score actualizado correctamente."
+                        "Nuevo score: " +
+                        currentScore
                     );
+    
+                    LoadScoreTable();
+                }
+            )
+        );
+    }
+
+    private void LoadScoreTable()
+    {
+        StartCoroutine(
+            userApi.GetUsers(
+                token,
+                users =>
+                {
+                    User currentUser =
+                        users.FirstOrDefault(
+                            user => user.username == username
+                        );
+    
+                    if (currentUser != null)
+                    {
+                        currentScore =
+                            currentUser.data.score;
+                    }
+    
+                    scoreTableUI.ShowUsers(users);
                 }
             )
         );

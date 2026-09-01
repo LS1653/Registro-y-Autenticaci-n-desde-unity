@@ -3114,7 +3114,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1526149119}
         m_TargetAssemblyTypeName: AuthManager, Assembly-CSharp
-        m_MethodName: TestUpdateScore
+        m_MethodName: UpdateScoreButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

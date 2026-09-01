@@ -82,11 +82,13 @@ public class UserApi : MonoBehaviour
         {
             Debug.Log("Score actualizado:");
             Debug.Log(request.downloadHandler.text);
-    
-            Debug.Log("Respuesta del servidor:");
-            Debug.Log(request.downloadHandler.text);
-            
-            onSuccess?.Invoke(null);
+        
+            UserUpdateResponse response =
+                JsonUtility.FromJson<UserUpdateResponse>(
+                    request.downloadHandler.text
+                );
+        
+            onSuccess?.Invoke(response.usuario);
         }
         else
         {

@@ -27,3 +27,9 @@ public class UserUpdateData
     public string username;
     public UserDat data;
 }
+
+[System.Serializable]
+public class UserUpdateResponse
+{
+    public User usuario;
+}
