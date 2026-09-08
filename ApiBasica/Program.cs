@@ -6,6 +6,7 @@ string ip = "127.0.0.1";
 int port = 1234;
 
 List<Usuario> MisUsuarios = new List<Usuario>();
+Dictionary<string, string> Tokens = new Dictionary<string, string>();
 
 HttpListener listener = new HttpListener();
 
@@ -155,6 +156,146 @@ async void HandleRequest(HttpListenerContext context)
 
         return;
     }
+
+    // Endpoint de Login
+    if (request.HttpMethod == "POST" &&
+        request.RawUrl == "/api/auth/login")
+    {
+        var reader =
+            new StreamReader(
+                request.InputStream,
+                request.ContentEncoding
+            );
+    
+        string requestBody =
+            await reader.ReadToEndAsync();
+    
+        AuthData authData =
+            JsonConvert.DeserializeObject<AuthData>(
+                requestBody
+            );
+    
+        if (authData == null)
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Debe enviar el usuario",
+                field = "username"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                400,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (string.IsNullOrEmpty(authData.username))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Debe enviar el usuario",
+                field = "username"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                400,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (string.IsNullOrEmpty(authData.password))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Debe enviar la contraseña",
+                field = "password"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                400,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        Usuario usuario =
+            MisUsuarios.FirstOrDefault(
+                u => u.username == authData.username
+            );
+    
+        if (usuario == null)
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Usuario o contraseña incorrectos"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (usuario.password != authData.password)
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Usuario o contraseña incorrectos"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        string token =
+            Guid.NewGuid().ToString();
+    
+        Tokens[token] = usuario.username;
+    
+        string jsonResponse =
+            JsonConvert.SerializeObject(
+                new LoginResponse(usuario, token)
+            );
+    
+        await SendResponse(
+            response,
+            200,
+            jsonResponse
+        );
+    
+        return;
+    }
 }
 
 async Task SendResponse(
@@ -226,6 +367,27 @@ public class RegistroResponse
         };
 
         this.token = "your_generated_token_here";
+    }
+}
+
+public class LoginResponse
+{
+    public UsuarioDto usuario;
+    public string token;
+
+    public LoginResponse(
+        Usuario usuario,
+        string token)
+    {
+        this.usuario = new UsuarioDto
+        {
+            username = usuario.username,
+            _id = usuario._id,
+            data = usuario.data,
+            estado = usuario.estado
+        };
+
+        this.token = token;
     }
 }
 
