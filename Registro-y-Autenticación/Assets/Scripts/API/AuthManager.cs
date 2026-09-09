@@ -6,7 +6,7 @@ using System.Linq;
 
 public class AuthManager : MonoBehaviour
 {
-    private const string Url = "https://sid-restapi.onrender.com";
+    private const string Url = "http://127.0.0.1:1234";
 
     private string token = "";
     private string username = "";

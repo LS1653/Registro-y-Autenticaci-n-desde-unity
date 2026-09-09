@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 public class UserApi : MonoBehaviour
 {
     private const string Url =
-        "https://sid-restapi.onrender.com/api/usuarios";
+        "http://127.0.0.1:1234/api/usuarios";
 
     public IEnumerator GetUsers(
         string token,
