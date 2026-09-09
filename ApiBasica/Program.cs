@@ -20,10 +20,10 @@ while (true)
 {
     var context = await listener.GetContextAsync();
 
-    HandleRequest(context);
+    await HandleRequest(context);
 }
 
-async void HandleRequest(HttpListenerContext context)
+async Task HandleRequest(HttpListenerContext context)
 {
     var request = context.Request;
     var response = context.Response;
@@ -377,7 +377,8 @@ async void HandleRequest(HttpListenerContext context)
 
     // Endpoint para obtener el perfil de un usuario
     if (request.HttpMethod == "GET" &&
-        request.RawUrl.StartsWith("/api/usuarios/"))
+    request.RawUrl != null &&
+    request.RawUrl.StartsWith("/api/usuarios/"))
     {
         string token = request.Headers["x-token"];
     
