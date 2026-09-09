@@ -469,6 +469,132 @@ async Task HandleRequest(HttpListenerContext context)
     
         return;
     }
+
+    // Endpoint para actualizar usuario
+    if (request.HttpMethod == "PATCH" &&
+        request.RawUrl == "/api/usuarios")
+    {
+        string token = request.Headers["x-token"];
+    
+        Console.WriteLine(
+            $"Token recibido: {token}"
+        );
+    
+        if (string.IsNullOrEmpty(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "No se proporcionó un token de autenticación"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (!Tokens.ContainsKey(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Token no válido"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        var reader =
+            new StreamReader(
+                request.InputStream,
+                request.ContentEncoding
+            );
+    
+        string requestBody =
+            await reader.ReadToEndAsync();
+    
+        UserUpdateData updateData =
+            JsonConvert.DeserializeObject<UserUpdateData>(
+                requestBody
+            );
+    
+        if (updateData == null ||
+            string.IsNullOrEmpty(updateData.username))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Debe enviar el usuario",
+                field = "username"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                400,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        Usuario usuario =
+            MisUsuarios.FirstOrDefault(
+                u => u.username == updateData.username
+            );
+    
+        if (usuario == null)
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Usuario no encontrado"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                404,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (updateData.data != null)
+        {
+            usuario.data = updateData.data;
+        }
+    
+        string jsonResponse =
+            JsonConvert.SerializeObject(
+                new UserUpdateResponse(usuario)
+            );
+    
+        await SendResponse(
+            response,
+            200,
+            jsonResponse
+        );
+    
+        return;
+    }
 }
 
 async Task SendResponse(
@@ -575,4 +701,26 @@ public class UsuarioDto
 public class UserListResponse
 {
     public List<UsuarioDto> usuarios;
+}
+
+public class UserUpdateData
+{
+    public string username;
+    public UserData data;
+}
+
+public class UserUpdateResponse
+{
+    public UsuarioDto usuario;
+
+    public UserUpdateResponse(Usuario usuario)
+    {
+        this.usuario = new UsuarioDto
+        {
+            _id = usuario._id,
+            username = usuario.username,
+            estado = usuario.estado,
+            data = usuario.data
+        };
+    }
 }
