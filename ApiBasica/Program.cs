@@ -296,6 +296,178 @@ async void HandleRequest(HttpListenerContext context)
     
         return;
     }
+
+    // Endpoint para listar usuarios
+    if (request.HttpMethod == "GET" &&
+        request.RawUrl == "/api/usuarios")
+    {
+        string token = request.Headers["x-token"];
+    
+        Console.WriteLine(
+            $"Token recibido: {token}"
+        );
+    
+        if (string.IsNullOrEmpty(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "No se proporcionó un token de autenticación"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (!Tokens.ContainsKey(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Token no válido"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        List<UsuarioDto> usuarios =
+            MisUsuarios
+            .Select(usuario => new UsuarioDto
+            {
+                _id = usuario._id,
+                username = usuario.username,
+                estado = usuario.estado,
+                data = usuario.data
+            })
+            .ToList();
+    
+        var usersResponse = new UserListResponse
+        {
+            usuarios = usuarios
+        };
+    
+        string jsonResponse =
+            JsonConvert.SerializeObject(
+                usersResponse
+            );
+    
+        await SendResponse(
+            response,
+            200,
+            jsonResponse
+        );
+    
+        return;
+    }
+
+    // Endpoint para obtener el perfil de un usuario
+    if (request.HttpMethod == "GET" &&
+        request.RawUrl.StartsWith("/api/usuarios/"))
+    {
+        string token = request.Headers["x-token"];
+    
+        Console.WriteLine(
+            $"Token recibido: {token}"
+        );
+    
+        if (string.IsNullOrEmpty(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "No se proporcionó un token de autenticación"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        if (!Tokens.ContainsKey(token))
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Token no válido"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                401,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        string username =
+            request.RawUrl.Substring(
+                "/api/usuarios/".Length
+            );
+    
+        Usuario usuario =
+            MisUsuarios.FirstOrDefault(
+                u => u.username == username
+            );
+    
+        if (usuario == null)
+        {
+            var error = new ErrorMessage
+            {
+                msg = "Usuario no encontrado"
+            };
+    
+            string contentResponse =
+                JsonConvert.SerializeObject(error);
+    
+            await SendResponse(
+                response,
+                404,
+                contentResponse
+            );
+    
+            return;
+        }
+    
+        string jsonResponse =
+            JsonConvert.SerializeObject(
+                new LoginResponse(
+                    usuario,
+                    token
+                )
+            );
+    
+        await SendResponse(
+            response,
+            200,
+            jsonResponse
+        );
+    
+        return;
+    }
 }
 
 async Task SendResponse(
@@ -397,4 +569,9 @@ public class UsuarioDto
     public string username { get; set; }
     public bool estado;
     public object data;
+}
+
+public class UserListResponse
+{
+    public List<UsuarioDto> usuarios;
 }
